@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Safal Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800;900&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: linear-gradient(-45deg, #e0f2fe, #f8fafc, #dbeafe, #bae6fd); background-size: 400% 400%; animation: gradientBG 6s ease infinite; min-height: 100vh; overflow-x: hidden; }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .book-icon { position: absolute; color: rgba(37, 99, 235, 0.15); font-size: 4rem; animation: floatUp 6s linear infinite; pointer-events: none; }
+        @keyframes floatUp { 0% { transform: translateY(100vh) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; } }
+        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); border-radius: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.6); }
+        .digital-id { background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); }
+        .scanner-overlay { box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.8); }
+        .hidden { display: none !important; }
+        .modal-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+    <div id="bg-animation" class="fixed inset-0 pointer-events-none overflow-hidden z-0"></div>
+    <div id="loginSection" class="w-full max-w-sm glass-card p-8 z-10 transition-all duration-500">
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg border-2 border-white">
+                <i class="fa-solid fa-book-open"></i>
+            </div>
+            <h1 class="text-3xl font-black text-slate-800 tracking-tight">Student Portal</h1>
+            <p class="text-sm font-bold text-blue-600 uppercase tracking-widest mt-1">Safal Library</p>
+        </div>
+        <form id="loginForm" class="space-y-4">
+            <div class="relative">
+                <i class="fa-solid fa-id-card absolute left-4 top-4 text-slate-400"></i>
+                <input type="text" id="loginRegNo" placeholder="Registration No " class="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-slate-200 uppercase font-bold outline-none focus:border-blue-500 transition" required>
+            </div>
+            <div class="relative">
+                <i class="fa-solid fa-lock absolute left-4 top-4 text-slate-400"></i>
+                <input type="password" id="loginPass" placeholder="Password" class="w-full pl-11 pr-4 py-3 rounded-xl border-2 border-slate-200 outline-none focus:border-blue-500 transition" required>
+            </div>
+            <p id="errorMsg" class="text-red-600 text-xs text-center font-bold hidden bg-red-50 border border-red-200 p-3 rounded-xl animate-pulse">
+                <i class="fa-solid fa-circle-exclamation mr-1"></i> Invalid Credentials. Try again.
+            </p>
+            <button type="submit" id="loginBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black text-lg py-4 rounded-xl shadow-xl shadow-blue-600/30 active:scale-95 transition">
+                Secure Login <i class="fa-solid fa-arrow-right ml-2"></i>
+            </button>
+        </form>
+        <div class="text-center mt-6 flex flex-col gap-2">
+            <p class="text-[10px] text-slate-400 font-bold">By logging in, you agree to our</p>
+            <button onclick="openRules()" class="text-blue-600 text-xs font-black hover:underline tracking-wide uppercase">Terms & Conditions</button>
+        </div>
+    </div>
+
+    <div id="dashboardSection" class="w-full max-w-md hidden z-10 modal-pop">
+        <div class="glass-card digital-id overflow-hidden border-4 border-white">
+            <div class="h-32 bg-[url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=800&q=80')] bg-cover bg-center relative">
+                <div class="absolute inset-0 bg-blue-900/70 backdrop-blur-sm"></div>
+                <div class="relative z-10 flex justify-between items-start p-4">
+                    <div class="bg-white/20 backdrop-blur-md text-white px-3 py-1 rounded-lg text-[10px] font-black tracking-widest uppercase border border-white/30 flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span> Active Profile
+                    </div>
+                    <button onclick="logout()" class="bg-white/10 hover:bg-white/30 text-white w-8 h-8 rounded-full flex items-center justify-center transition border border-white/30">
+                        <i class="fa-solid fa-power-off text-sm"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="px-6 pb-6 relative text-center -mt-12">
+                <img id="profileImg" src="" class="w-28 h-28 mx-auto rounded-2xl border-4 border-white bg-slate-100 object-cover shadow-2xl relative z-20">
+                <div class="mt-4 mb-6">
+                    <h2 id="dispName" class="text-2xl font-black text-slate-800 tracking-tight">Student Name</h2>
+                    <div class="flex items-center justify-center gap-2 mt-1">
+                        <p id="dispRegNo" class="text-blue-600 font-black text-sm bg-blue-50 px-3 py-1 rounded-lg border border-blue-100">#---</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                        <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-2"><i class="fa-solid fa-clock"></i></div>
+                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider">Shift Time</p>
+                        <p id="dispTime" class="text-slate-800 font-bold text-sm mt-1">-- : --</p>
+                    </div>
+                    <div id="feeBox" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm transition-colors">
+                        <div class="w-8 h-8 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-2" id="feeIcon"><i class="fa-solid fa-calendar-check"></i></div>
+                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-wider">Valid Until</p>
+                        <p id="dispFeeDate" class="font-bold text-sm mt-1">--/--/----</p>
+                    </div>
+                </div>
+                <button onclick="startAttendanceScanner()" class="w-full bg-slate-900 hover:bg-black text-white py-4 rounded-2xl font-black text-lg shadow-xl shadow-slate-900/30 active:scale-95 transition flex items-center justify-center gap-3 border border-slate-700">
+                    <i class="fa-solid fa-qrcode text-2xl text-blue-400"></i> SCAN TO ENTER
+                </button>
+                <button onclick="openPaymentHistory()" class="w-full bg-blue-50 text-blue-600 hover:bg-blue-100 py-3 rounded-2xl font-bold text-sm transition mt-3 border border-blue-100 flex items-center justify-center gap-2 mb-6">
+                    <i class="fa-solid fa-clock-rotate-left"></i> View Payment History
+                </button>
+                <div class="text-left bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3 text-xs">
+                    <div class="flex justify-between items-center border-b border-slate-200 pb-2">
+                        <span class="text-slate-500 font-bold uppercase text-[10px]">Father's Name</span>
+                        <b id="dispFather" class="text-slate-800">--</b>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-slate-200 pb-2">
+                        <span class="text-slate-500 font-bold uppercase text-[10px]">Aadhar No</span>
+                        <b id="dispAadhar" class="text-slate-800">--</b>
+                    </div>
+                    <div class="pt-1">
+                        <span class="text-slate-500 font-bold uppercase text-[10px] block mb-1">Address</span>
+                        <p id="dispAddress" class="text-slate-700 font-medium leading-snug">--</p>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-center gap-4">
+                    <button onclick="openRules()" class="text-slate-400 font-bold text-xs hover:text-blue-600 transition"><i class="fa-solid fa-file-contract mr-1"></i> Rules</button>
+                    <span class="text-slate-300">|</span>
+                    <a href="https://wa.me/919305506411?text=Hi%20Admin,%20I%20need%20help%20with%20my%20library%20profile." target="_blank" class="text-green-600 font-bold text-xs hover:text-green-700 transition"><i class="fa-brands fa-whatsapp mr-1"></i> Support</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="paymentModal" class="fixed inset-0 bg-slate-900/80 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm" onclick="closePaymentHistory()">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl relative modal-pop overflow-hidden max-h-[85vh] flex flex-col" onclick="event.stopPropagation()">
+            <div class="bg-slate-900 p-5 text-center relative shrink-0">
+                <button onclick="closePaymentHistory()" class="absolute top-4 right-5 text-white/50 hover:text-white text-2xl transition"><i class="fa-solid fa-xmark"></i></button>
+                <h2 class="text-white font-black text-xl uppercase tracking-widest">Payment History</h2>
+                <p class="text-blue-400 text-xs font-bold tracking-widest mt-1">Past Transactions</p>
+            </div>
+            <div class="p-6 overflow-y-auto bg-slate-50 flex-1" id="paymentListContainer"></div>
+        </div>
+    </div>
+
+    <div id="rulesModal" class="fixed inset-0 bg-slate-900/80 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm" onclick="closeRules()">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl relative modal-pop overflow-hidden max-h-[90vh] flex flex-col" onclick="event.stopPropagation()">
+            <div class="bg-slate-900 p-5 text-center relative shrink-0">
+                <button onclick="closeRules()" class="absolute top-4 right-5 text-white/50 hover:text-white text-2xl transition"><i class="fa-solid fa-xmark"></i></button>
+                <h2 class="text-white font-black text-xl uppercase tracking-widest">Library Rules</h2>
+                <p class="text-blue-400 text-xs font-bold tracking-widest mt-1">सफल पुस्तकालय के नियम</p>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-6 text-sm text-slate-700 bg-slate-50">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                    <h3 class="font-black text-slate-800 flex items-center gap-2 mb-2"><i class="fa-solid fa-volume-xmark text-blue-500 text-lg"></i> 1. SILENCE / शांति</h3>
+                    <p class="text-slate-600 text-xs mb-1">Maintain strict silence upon entering the library premises.</p>
+                    <p class="text-slate-800 font-bold text-xs">पुस्तकालय परिसर में प्रवेश करते ही पूर्ण शांति बनाए रखें।</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                    <h3 class="font-black text-slate-800 flex items-center gap-2 mb-2"><i class="fa-solid fa-gavel text-red-500 text-lg"></i> 2. DISCIPLINE / अनुशासन</h3>
+                    <p class="text-slate-600 text-xs mb-1">Any violence or misbehavior will be reported directly to the Ballia Judiciary.</p>
+                    <p class="text-slate-800 font-bold text-xs">हिंसा या दुर्व्यवहार की सूचना सीधे बलिया न्यायपालिका को दी जाएगी।</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                    <h3 class="font-black text-slate-800 flex items-center gap-2 mb-2"><i class="fa-solid fa-money-bill-wave text-green-500 text-lg"></i> 3. FEE POLICY / शुल्क नीति</h3>
+                    <p class="text-slate-600 text-xs mb-1">Fees are non-refundable, but can be managed according to your needs.</p>
+                    <p class="text-slate-800 font-bold text-xs">शुल्क वापस नहीं होगा, लेकिन जरूरत अनुसार व्यवस्थित किया जा सकता है।</p>
+                </div>
+                <div class="text-center pt-2">
+                    <button onclick="closeRules()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-black text-sm transition shadow-lg shadow-blue-200 w-full">I Agree / सहमत हूँ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="scannerView" class="fixed inset-0 bg-black/95 z-[100] hidden flex flex-col items-center justify-center p-6 backdrop-blur-md modal-pop">
+        <h2 class="text-white font-black text-2xl mb-2 tracking-widest">SCAN QR CODE</h2>
+        <p class="text-blue-400 font-bold text-xs mb-8 text-center px-8">Point your camera at the desk QR or Entry QR to mark attendance.</p>
+        <div class="relative w-full max-w-sm aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-700 bg-black">
+            <div class="absolute inset-0 z-10 pointer-events-none flex flex-col items-center justify-center">
+                <div class="w-3/4 h-3/4 border-2 border-white/50 rounded-2xl relative">
+                    <div class="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-blue-500 rounded-tl-xl"></div>
+                    <div class="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-blue-500 rounded-tr-xl"></div>
+                    <div class="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-blue-500 rounded-bl-xl"></div>
+                    <div class="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-blue-500 rounded-br-xl"></div>
+                    <div class="w-full h-1 bg-blue-500/80 absolute top-0 left-0 shadow-[0_0_15px_rgba(59,130,246,0.8)] animate-[scan_2s_ease-in-out_infinite]"></div>
+                </div>
+            </div>
+            <div id="reader" class="w-full h-full object-cover"></div>
+        </div>
+        <button onclick="stopAttendanceScanner()" class="mt-10 bg-white/10 text-white hover:bg-white/20 border border-white/20 px-8 py-4 rounded-2xl font-black tracking-widest text-sm transition w-full max-w-sm">CANCEL SCAN</button>
+    </div>
+    <style>@keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }</style>
+
+    <button id="fab-ai" onclick="openAiModal()" class="fixed bottom-6 right-6 bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-[0_10px_25px_rgba(37,99,235,0.5)] hover:bg-blue-700 hover:scale-110 active:scale-95 transition-all z-50 hidden modal-pop border-2 border-white">
+        <i class="fa-solid fa-robot"></i>
+    </button>
+
+    <div id="aiModal" class="fixed inset-0 bg-slate-900/80 hidden z-[110] flex items-center justify-center p-4 backdrop-blur-sm" onclick="closeAiModal()">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl relative modal-pop overflow-hidden h-[85vh] flex flex-col" onclick="event.stopPropagation()">
+            <div class="bg-blue-600 p-4 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white text-xl"><i class="fa-solid fa-robot"></i></div>
+                    <div>
+                        <h2 class="text-white font-black text-lg leading-tight">Safal AI</h2>
+                        <p class="text-blue-200 text-[10px] font-bold uppercase tracking-widest">Student Assistant</p>
+                    </div>
+                </div>
+                <div class="flex gap-3 items-center">
+                    <select id="ai-language" class="text-xs bg-white/20 text-white border border-white/30 rounded px-2 py-1 outline-none font-bold cursor-pointer">
+                        <option value="English" class="text-slate-800">English</option>
+                        <option value="Hindi" class="text-slate-800">Hindi</option>
+                        <option value="Hinglish" class="text-slate-800">Hinglish</option>
+                    </select>
+                    <button onclick="closeAiModal()" class="text-white/70 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+            </div>
+            <div id="ai-chat-history" class="p-4 overflow-y-auto flex-1 bg-slate-50 flex flex-col gap-3 text-sm">
+                <div class="bg-white border border-slate-200 text-slate-700 p-3 rounded-2xl rounded-tl-sm self-start max-w-[85%] shadow-sm leading-relaxed">
+                    Welcome to Safal Library! Type, speak <i class="fa-solid fa-microphone text-blue-500 mx-1"></i>, or upload a picture <i class="fa-solid fa-camera text-blue-500 mx-1"></i> of your question.
+                </div>
+            </div>
+            <div id="ai-loading" class="hidden px-5 py-2 text-xs font-bold text-slate-400 italic bg-slate-50"><i class="fa-solid fa-circle-notch fa-spin mr-1"></i> AI is thinking...</div>
+            <div id="ai-image-preview-container" class="hidden px-4 py-3 bg-slate-100 border-t border-slate-200 relative shrink-0">
+                <img id="ai-image-preview" src="" class="h-16 rounded-lg border border-slate-300 shadow-sm object-cover">
+                <button onclick="clearAiImage()" class="absolute top-1 left-2 bg-slate-800 text-white rounded-full w-6 h-6 flex items-center justify-center text-[10px] shadow hover:bg-red-500 transition"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="bg-white p-3 border-t border-slate-100 flex items-center gap-2 shrink-0">
+                <input type="file" id="ai-file-input" accept="image/*" class="hidden" onchange="handleAiImageUpload(event)">
+                <button onclick="document.getElementById('ai-file-input').click()" class="text-slate-400 hover:text-blue-600 transition p-2 bg-slate-100 rounded-full w-10 h-10 flex items-center justify-center"><i class="fa-solid fa-camera"></i></button>
+                <button id="ai-mic-btn" onclick="toggleAiMic()" class="text-slate-400 hover:text-blue-600 transition p-2 bg-slate-100 rounded-full w-10 h-10 flex items-center justify-center"><i class="fa-solid fa-microphone"></i></button>
+                <input type="text" id="ai-user-input" placeholder="Ask a question..." class="flex-1 bg-slate-100 border-none rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-100 font-medium text-slate-700" onkeypress="handleAiKeyPress(event)">
+                <button id="ai-send-btn" onclick="sendAiMessage()" class="bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center hover:bg-blue-700 transition shadow-lg shadow-blue-200 shrink-0"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // ⚠️ REPLACE THIS WITH YOUR DEPLOYED RENDER BACKEND URL ⚠️
+        const BACKEND_URL = 'https://test3-qi2z.onrender.com/';
+
+        let studentData = null;
+        let scanner = null;
+
+        // Auto-login
+        window.addEventListener('DOMContentLoaded', async () => {
+            const savedReg = localStorage.getItem('safal_student_reg');
+            const savedPass = localStorage.getItem('safal_student_pass');
+            if(savedReg && savedPass) {
+                document.getElementById('loginBtn').innerText = "Resuming Session...";
+                await attemptLogin(savedReg, savedPass);
+            }
+        });
+
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', async(e) => {
+            e.preventDefault(); 
+            const r = document.getElementById('loginRegNo').value.trim().toUpperCase(); 
+            const p = document.getElementById('loginPass').value.trim();
+            await attemptLogin(r, p);
+        });
+
+        async function attemptLogin(regNo, pass) {
+            const btn = document.getElementById('loginBtn'); 
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Authenticating...`;
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ regNo, pass })
+                });
+
+                if(response.ok) {
+                    studentData = await response.json();
+                    localStorage.setItem('safal_student_reg', regNo);
+                    localStorage.setItem('safal_student_pass', pass);
+                    renderDash(); 
+                    document.getElementById('loginSection').classList.add('hidden'); 
+                    document.getElementById('dashboardSection').classList.remove('hidden');
+                } else {
+                    document.getElementById('errorMsg').classList.remove('hidden');
+                    btn.innerHTML = `Secure Login <i class="fa-solid fa-arrow-right ml-2"></i>`;
+                    localStorage.clear();
+                }
+            } catch (err) {
+                console.error(err);
+                btn.innerHTML = `Secure Login <i class="fa-solid fa-arrow-right ml-2"></i>`;
+            }
+        }
+
+        window.logout = function() {
+            localStorage.clear();
+            document.getElementById('fab-ai').classList.add('hidden');
+            location.reload();
+        }
+
+        // Dashboard
+        function renderDash() {
+            document.getElementById('dispName').innerText = studentData.name; 
+            document.getElementById('dispRegNo').innerText = "#" + studentData.regNo;
+            document.getElementById('dispTime').innerText = formatTime(studentData.shiftStart) + " - " + formatTime(studentData.shiftEnd);
+            document.getElementById('dispFather').innerText = studentData.father || "N/A"; 
+            document.getElementById('dispAadhar').innerText = studentData.aadhar || "N/A";
+            document.getElementById('dispAddress').innerText = studentData.address || "N/A"; 
+            document.getElementById('profileImg').src = studentData.image || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+
+            if (studentData.aiEnabled !== false) {
+                document.getElementById('fab-ai').classList.remove('hidden');
+            } else {
+                document.getElementById('fab-ai').classList.add('hidden');
+            }
+
+            const today = new Date(); today.setHours(0,0,0,0);
+            const due = new Date(studentData.feeDueDate);
+            const feeBox = document.getElementById('feeBox');
+            const feeIcon = document.getElementById('feeIcon');
+            const dispFee = document.getElementById('dispFeeDate');
+            
+            if (due < today) {
+                feeBox.className = "bg-red-50 p-4 rounded-2xl border border-red-200 shadow-sm animate-pulse";
+                feeIcon.className = "w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-2";
+                feeIcon.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i>`;
+                dispFee.className = "font-black text-sm mt-1 text-red-700";
+                dispFee.innerText = "OVERDUE (" + formatDateStr(studentData.feeDueDate) + ")";
+            } else {
+                dispFee.className = "font-bold text-sm mt-1 text-slate-800";
+                dispFee.innerText = formatDateStr(studentData.feeDueDate);
+            }
+        } 
+
+        // Payment History
+        window.openPaymentHistory = async () => {
+            document.getElementById('paymentModal').classList.remove('hidden');
+            const container = document.getElementById('paymentListContainer');
+            container.innerHTML = `<div class="text-center py-10 text-slate-400"><i class="fa-solid fa-circle-notch fa-spin text-3xl mb-3 text-blue-500"></i><p class="text-xs font-bold uppercase">Loading records...</p></div>`;
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/payments/${studentData.regNo}`);
+                const payments = await response.json();
+                
+                payments.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                if(payments.length === 0) {
+                    container.innerHTML = `<div class="text-center py-10"><div class="w-16 h-16 bg-slate-200 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl shadow-inner"><i class="fa-solid fa-receipt"></i></div><p class="text-slate-500 font-bold">No payment history found.</p><p class="text-[10px] text-slate-400 mt-1">Recent payments may take time to update.</p></div>`;
+                    return;
+                }
+
+                container.innerHTML = '<div class="space-y-3"></div>';
+                const listDiv = container.querySelector('div');
+
+                payments.forEach(p => {
+                    listDiv.innerHTML += `
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex justify-between items-center hover:border-blue-300 transition">
+                            <div>
+                                <p class="text-xs font-bold text-slate-400 mb-1"><i class="fa-regular fa-calendar text-[10px]"></i> ${formatDateStr(p.date)}</p>
+                                <p class="font-black text-slate-800 text-lg">₹${p.amount}</p>
+                                <p class="text-[9px] text-slate-500 font-bold uppercase mt-1 tracking-widest bg-slate-50 inline-block px-2 py-0.5 rounded">Valid: ${formatDateStr(p.startDate)} - ${formatDateStr(p.endDate)}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="bg-green-100 text-green-700 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-green-200">PAID</span>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase mt-2">${p.mode || 'Cash'}</p>
+                            </div>
+                        </div>`;
+                });
+            } catch(e) {
+                container.innerHTML = `<p class="text-center text-red-500 text-xs font-bold py-10">Error loading history. Check connection.</p>`;
+            }
+        }
+        window.closePaymentHistory = () => document.getElementById('paymentModal').classList.add('hidden');
+
+        // Rules Modal
+        window.openRules = () => document.getElementById('rulesModal').classList.remove('hidden');
+        window.closeRules = () => document.getElementById('rulesModal').classList.add('hidden');
+
+        // QR Scanner
+        window.startAttendanceScanner = () => {
+            document.getElementById('scannerView').classList.remove('hidden');
+            scanner = new Html5Qrcode("reader");
+            scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, async (code) => {
+                await stopAttendanceScanner();
+                
+                let payload = {};
+                if (code.startsWith("SAFAL_SEAT_")) {
+                    const seatNum = code.split("_")[2];
+                    payload = { type: 'seat', studentId: studentData.id, name: studentData.name, regNo: studentData.regNo, seatNo: seatNum };
+                    studentData.seatNo = seatNum; 
+                    renderDash(); 
+                } else if(code === "SAFAL_LIB_ENTRY_2026") {
+                    payload = { type: 'entry', studentId: studentData.id, name: studentData.name, regNo: studentData.regNo };
+                }
+
+                try {
+                    const response = await fetch(`${BACKEND_URL}/api/attendance`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+                    if(result.success) alert(`✅ ${result.message}`);
+                } catch (err) {
+                    alert("Error marking attendance. Try again.");
+                }
+            });
+        }
+        window.stopAttendanceScanner = async () => { if(scanner){ await scanner.stop(); scanner=null; } document.getElementById('scannerView').classList.add('hidden'); }
+
+        // Helpers & Animations
+        function formatTime(t){if(!t)return"--";const[h,m]=t.split(':');return`${h%12||12}:${m}${h>=12?'PM':'AM'}`;}
+        function formatDateStr(dateStr) { if(!dateStr) return "--/--/----"; const d = new Date(dateStr); return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); }
+        
+        const bgContainer = document.getElementById('bg-animation');
+        for(let i=0; i<20; i++){ 
+            const b = document.createElement('i'); b.className = 'fa-solid fa-book book-icon'; b.style.left = Math.random() * 100 + 'vw'; b.style.animationDuration = (4 + Math.random() * 4) + 's'; b.style.animationDelay = (Math.random() * 3) + 's'; const icons = ['fa-book', 'fa-graduation-cap', 'fa-pen', 'fa-laptop-code']; b.classList.add(icons[Math.floor(Math.random() * icons.length)]); bgContainer.appendChild(b);
+        }
+
+        // AI ASSISTANT
+        let aiConversationHistory = [];
+        let aiImageBase64 = null;
+        let aiImageMimeType = null;
+        
+        window.openAiModal = () => document.getElementById('aiModal').classList.remove('hidden');
+        window.closeAiModal = () => document.getElementById('aiModal').classList.add('hidden');
+
+        // Speech Recognition Setup
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null; let isAiRecording = false;
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition(); recognition.continuous = false; recognition.interimResults = false;
+            recognition.onstart = function() { isAiRecording = true; const micBtn = document.getElementById('ai-mic-btn'); micBtn.classList.add('text-red-500', 'animate-pulse'); micBtn.classList.remove('text-slate-400'); document.getElementById('ai-user-input').placeholder = "Listening..."; };
+            recognition.onresult = function(event) { document.getElementById('ai-user-input').value += event.results[0][0].transcript; };
+            recognition.onerror = function(event) { stopAiMic(); }; recognition.onend = function() { stopAiMic(); };
+        } else { document.getElementById('ai-mic-btn').style.display = 'none'; }
+
+        window.toggleAiMic = function() {
+            if (!recognition) return;
+            if (isAiRecording) { recognition.stop(); } else {
+                const lang = document.getElementById('ai-language').value; recognition.lang = lang === 'Hindi' ? 'hi-IN' : (lang === 'English' ? 'en-US' : 'hi-IN'); recognition.start();
+            }
+        }
+        function stopAiMic() { isAiRecording = false; const micBtn = document.getElementById('ai-mic-btn'); micBtn.classList.remove('text-red-500', 'animate-pulse'); micBtn.classList.add('text-slate-400'); document.getElementById('ai-user-input').placeholder = "Ask a question..."; }
+
+        // Image Upload
+        window.handleAiImageUpload = function(event) {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('ai-image-preview').src = e.target.result; document.getElementById('ai-image-preview-container').classList.remove('hidden');
+                aiImageBase64 = e.target.result.split(',')[1]; aiImageMimeType = file.type;
+            };
+            reader.readAsDataURL(file);
+        }
+        window.clearAiImage = function() { aiImageBase64 = null; aiImageMimeType = null; document.getElementById('ai-image-preview-container').classList.add('hidden'); document.getElementById('ai-file-input').value = ""; }
+
+        window.handleAiKeyPress = function(event) { if (event.key === 'Enter') window.sendAiMessage(); }
+        function formatAiText(text) {
+            let formatted = text.replace(/\n/g, '<br>'); formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="text-blue-600 font-bold underline">$1</a>');
+            formatted = formatted.replace(/(https?:\/\/[^\s]+)(?!["'])/g, function(url) { if(url.includes('href=')) return url; return `<a href="${url}" target="_blank" class="text-blue-600 font-bold underline">${url}</a>`; }); return formatted;
+        }
+
+        function appendAiMessage(sender, text, imageUrl = null) {
+            const history = document.getElementById('ai-chat-history'); const msgDiv = document.createElement('div');
+            msgDiv.className = sender === 'user' ? "bg-blue-600 text-white p-3 rounded-2xl rounded-tr-sm self-end max-w-[85%] shadow-sm leading-relaxed" : "bg-white border border-slate-200 text-slate-700 p-3 rounded-2xl rounded-tl-sm self-start max-w-[85%] shadow-sm leading-relaxed";
+            msgDiv.innerHTML = formatAiText(text);
+            if (imageUrl) { const img = document.createElement('img'); img.src = imageUrl; img.className = "mt-2 rounded-lg max-w-full border border-black/10 shadow-sm"; msgDiv.appendChild(img); }
+            history.appendChild(msgDiv); history.scrollTop = history.scrollHeight;
+        }
+
+        window.sendAiMessage = async function() {
+            const userInput = document.getElementById('ai-user-input'); const sendBtn = document.getElementById('ai-send-btn'); const loading = document.getElementById('ai-loading');
+            const text = userInput.value.trim(); const hasImage = aiImageBase64 !== null;
+            if (!text && !hasImage) return;
+
+            const previewUrl = hasImage ? document.getElementById('ai-image-preview').src : null;
+            appendAiMessage('user', text, previewUrl);
+            userInput.value = ''; sendBtn.disabled = true; loading.classList.remove('hidden');
+
+            let userParts = [];
+            if (text) userParts.push({ text: text });
+            if (hasImage) userParts.push({ inline_data: { mime_type: aiImageMimeType, data: aiImageBase64 } });
+
+            window.clearAiImage(); aiConversationHistory.push({ role: "user", parts: userParts });
+
+            const studentName = studentData ? studentData.name : "Student";
+            const currentLang = document.getElementById('ai-language').value;
+            const dynamicSystemInstruction = `You are the official AI assistant for Safal Library. You are talking to a student named ${studentName}. Library Information: Opening Hours: 7 AM - 7 PM, Mobile No: 9305506411, Address: Near BSNL Office Bansdih Ballia. CRITICAL RULE: You MUST respond to the user in ${currentLang}. Help them solve questions, equations, or provide library info. Be encouraging.`;
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/ai`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ systemInstruction: dynamicSystemInstruction, contents: aiConversationHistory })
+                });
+
+                if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                const data = await response.json();
+                const aiResponse = data.candidates[0].content.parts[0].text;
+                aiConversationHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+                appendAiMessage('ai', aiResponse);
+            } catch (error) {
+                appendAiMessage('ai', 'Sorry, the server is busy. Please wait a few seconds and try again.');
+                aiConversationHistory.pop(); 
+            } finally {
+                sendBtn.disabled = false; loading.classList.add('hidden'); userInput.focus();
+            }
+        }
+    </script>
+</body>
+</html>
